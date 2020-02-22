@@ -1,0 +1,4 @@
+{
+  "*.{js,ts,tsx}": ["npm run format", "eslint --cache --fix"],
+  "*.{json,md}": ["npm run format"]
+}

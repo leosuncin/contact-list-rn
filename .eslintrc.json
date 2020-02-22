@@ -1,0 +1,17 @@
+{
+  "parserOptions": {
+    "warnOnUnsupportedTypeScriptVersion": false
+  },
+  "plugins": ["react-native-a11y"],
+  "extends": [
+    "@react-native-community",
+    "plugin:react-native-a11y/recommended"
+  ],
+  "env": {
+    "node": true,
+    "browser": true,
+    "es6": true,
+    "jest": true,
+    "react-native/react-native": true
+  }
+}
