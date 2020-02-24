@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { DataTable, Paragraph, Surface } from 'react-native-paper';
+import { Colors, DataTable, FAB, Paragraph, Surface } from 'react-native-paper';
 import { Contact } from 'types';
 
 const ListContact: React.FC = () => {
@@ -67,6 +67,7 @@ const ListContact: React.FC = () => {
           <Paragraph>{error}</Paragraph>
         </Surface>
       )}
+      <FAB icon="plus" style={styles.fab} />
     </View>
   );
 };
@@ -86,5 +87,12 @@ const styles = StyleSheet.create({
   center: {
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  fab: {
+    position: 'absolute',
+    margin: 16,
+    right: 0,
+    bottom: 0,
+    backgroundColor: Colors.green400,
   },
 });
