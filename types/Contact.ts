@@ -11,3 +11,11 @@ export type Contact = {
   website: string;
   company: Company;
 };
+
+export type CreateContact = Omit<Contact, 'id'>;
+
+export type UpdateContact = Readonly<Pick<Contact, 'id'>> &
+  Partial<Omit<CreateContact, 'address' | 'company'>> & {
+    address?: Partial<Address>;
+    company?: Partial<Company>;
+  };
