@@ -15,6 +15,7 @@ type ContactReducers = {
     state: Array<Contact>,
     action: PayloadAction<UpdateContact>,
   ) => void;
+  removeContact: (state: Array<Contact>, action: PayloadAction<number>) => void;
 };
 
 const contactSlice = createSlice<Array<Contact>, ContactReducers>({
@@ -33,10 +34,19 @@ const contactSlice = createSlice<Array<Contact>, ContactReducers>({
       );
       Object.assign(state[index], action.payload);
     },
+    removeContact(state, action) {
+      const index = state.findIndex(contact => contact.id === action.payload);
+      state.splice(index, 1);
+    },
   },
 });
 
 export const selectContacts = (state: RootState): Array<Contact> =>
   state.contacts;
-export const { loadContacts, addContact, updateContact } = contactSlice.actions;
+export const {
+  loadContacts,
+  addContact,
+  updateContact,
+  removeContact,
+} = contactSlice.actions;
 export default contactSlice.reducer;

@@ -3,13 +3,17 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import React, { useState } from 'react';
 import { NativeModules, Platform, StyleSheet, View } from 'react-native';
 import {
+  Button,
   Card,
+  Dialog,
   Divider,
   FAB,
   Paragraph,
   Portal,
   Title,
 } from 'react-native-paper';
+import { useDispatch } from 'react-redux';
+import { removeContact } from 'state/slices/contact';
 import { RootStackParams } from 'types/RootStackParams';
 
 type ShowContactProps = {
@@ -20,6 +24,12 @@ type ShowContactProps = {
 const ShowContact: React.FC<ShowContactProps> = props => {
   const contact = props.route.params.contact;
   const [open, setOpen] = useState(false);
+  const [showDialog, setShowDialog] = useState(false);
+  const dispatch = useDispatch();
+
+  function toggleDialog() {
+    setShowDialog(prevShow => !prevShow);
+  }
 
   return (
     <View style={styles.screen}>
@@ -54,11 +64,40 @@ const ShowContact: React.FC<ShowContactProps> = props => {
           style={styles.fab}
           open={open}
           actions={[
-            { icon: 'delete', label: 'Remove contact', onPress() {} },
+            {
+              icon: 'delete',
+              label: 'Remove contact',
+              onPress: toggleDialog,
+            },
             { icon: 'pencil', label: 'Edit contact', onPress() {} },
           ]}
           onStateChange={({ open }) => setOpen(open)}
         />
+        <Dialog visible={showDialog} onDismiss={toggleDialog}>
+          <Dialog.Title>Confirm remove</Dialog.Title>
+          <Dialog.Content>
+            <Paragraph>Are you sure?</Paragraph>
+          </Dialog.Content>
+          <Dialog.Actions>
+            <Button style={styles.dialogButton} onPress={toggleDialog}>
+              Cancel
+            </Button>
+            <Button
+              style={styles.dialogButton}
+              onPress={() => {
+                dispatch(removeContact(contact.id));
+                toggleDialog();
+                if (props.navigation.canGoBack()) {
+                  props.navigation.goBack();
+                } else {
+                  props.navigation.pop();
+                }
+              }}
+            >
+              OK
+            </Button>
+          </Dialog.Actions>
+        </Dialog>
       </Portal>
     </View>
   );
@@ -79,5 +118,8 @@ const styles = StyleSheet.create({
     margin: 16,
     right: 0,
     bottom: 0,
+  },
+  dialogButton: {
+    minWidth: 60,
   },
 });
