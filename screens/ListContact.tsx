@@ -1,20 +1,26 @@
+import { StackNavigationProp } from '@react-navigation/stack';
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import {
+  ActivityIndicator,
   Button,
   Colors,
   DataTable,
   FAB,
   Paragraph,
   Surface,
-  ActivityIndicator,
 } from 'react-native-paper';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from 'state/rootReducer';
 import { selectContacts } from 'state/slices/contact';
 import { fetchContacts } from 'state/slices/fetch';
+import { RootStackParams } from 'types/RootStackParams';
 
-const ListContact: React.FC = () => {
+type ListContactProps = {
+  navigation: StackNavigationProp<RootStackParams, 'ListContact'>;
+};
+
+const ListContact: React.FC<ListContactProps> = props => {
   const contacts = useSelector(selectContacts);
   const { state, error } = useSelector(
     (rootState: RootState) => rootState.fetch,
@@ -45,7 +51,12 @@ const ListContact: React.FC = () => {
             <DataTable.Title>Username</DataTable.Title>
           </DataTable.Header>
           {contacts.map(contact => (
-            <DataTable.Row key={contact.id}>
+            <DataTable.Row
+              key={contact.id}
+              onPress={() => {
+                props.navigation.navigate('ShowContact', { contact });
+              }}
+            >
               <DataTable.Cell>{contact.id}</DataTable.Cell>
               <DataTable.Cell>{contact.name}</DataTable.Cell>
               <DataTable.Cell>{contact.username}</DataTable.Cell>

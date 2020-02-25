@@ -4,9 +4,11 @@ import React from 'react';
 import { Provider as PaperProvider } from 'react-native-paper';
 import { Provider } from 'react-redux';
 import ListContact from 'screens/ListContact';
+import ShowContact from 'screens/ShowContact';
 import store from 'state/store';
+import { RootStackParams } from 'types/RootStackParams';
 
-const Stack = createStackNavigator();
+const Stack = createStackNavigator<RootStackParams>();
 
 export default function App() {
   return (
@@ -15,6 +17,7 @@ export default function App() {
         <NavigationContainer>
           <Stack.Navigator initialRouteName="ListContact" headerMode="none">
             <Stack.Screen name="ListContact" component={ListContact} />
+            <Stack.Screen name="ShowContact" component={ShowContact} />
           </Stack.Navigator>
         </NavigationContainer>
       </PaperProvider>
