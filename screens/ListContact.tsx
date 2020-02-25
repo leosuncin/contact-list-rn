@@ -1,47 +1,43 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { StyleSheet, View } from 'react-native';
-import { Colors, DataTable, FAB, Paragraph, Surface } from 'react-native-paper';
-import { Contact } from 'types';
+import {
+  Button,
+  Colors,
+  DataTable,
+  FAB,
+  Paragraph,
+  Surface,
+  ActivityIndicator,
+} from 'react-native-paper';
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState } from 'state/rootReducer';
+import { selectContacts } from 'state/slices/contact';
+import { fetchContacts } from 'state/slices/fetch';
 
 const ListContact: React.FC = () => {
-  const [state, setState] = useState<'loading' | 'list' | 'empty' | 'fail'>(
-    'loading',
+  const contacts = useSelector(selectContacts);
+  const { state, error } = useSelector(
+    (rootState: RootState) => rootState.fetch,
   );
-  const [contacts, setContacts] = useState<Contact[]>([]);
-  const [error, setError] = useState<string>(null);
-
-  useEffect(() => {
-    (async () => {
-      try {
-        const response = await fetch(
-          'https://jsonplaceholder.typicode.com/users',
-        );
-        if (response.ok) {
-          const json = (await response.json()) as Contact[];
-          if (Array.isArray(json) && json.length > 0) {
-            setState('list');
-          } else {
-            setState('empty');
-          }
-          setContacts(json);
-        } else {
-          setState('fail');
-        }
-      } catch (fail) {
-        setState('fail');
-        setError(fail.message);
-      }
-    })();
-  }, []);
+  const dispatch = useDispatch();
 
   return (
-    <View style={[styles.screen, state !== 'list' && styles.center]}>
+    <View style={[styles.screen, state !== 'loaded' && styles.center]}>
+      {state === 'ready' && contacts.length < 1 && (
+        <Surface style={styles.surface}>
+          <Paragraph>There isn't any contacts</Paragraph>
+          <Button onPress={() => dispatch(fetchContacts())}>
+            Load some contacts
+          </Button>
+        </Surface>
+      )}
       {state === 'loading' && (
         <Surface style={styles.surface}>
           <Paragraph>Loading contacts</Paragraph>
+          <ActivityIndicator animating size="large" />
         </Surface>
       )}
-      {state === 'list' && (
+      {state === 'loaded' && (
         <DataTable>
           <DataTable.Header>
             <DataTable.Title>ID</DataTable.Title>
@@ -56,11 +52,6 @@ const ListContact: React.FC = () => {
             </DataTable.Row>
           ))}
         </DataTable>
-      )}
-      {state === 'empty' && (
-        <Surface style={styles.surface}>
-          <Paragraph>There isn't any contacts</Paragraph>
-        </Surface>
       )}
       {state === 'fail' && (
         <Surface style={styles.surface}>
