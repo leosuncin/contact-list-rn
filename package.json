@@ -56,7 +56,10 @@
     "typescript": "~3.6.3"
   },
   "jest": {
-    "preset": "@testing-library/react-native"
+    "preset": "@testing-library/react-native",
+    "setupFiles": [
+      "<rootDir>/node_modules/react-native-gesture-handler/jestSetup.js"
+    ]
   },
   "license": "GPL-3.0",
   "repository": {
