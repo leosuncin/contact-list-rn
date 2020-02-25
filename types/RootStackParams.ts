@@ -5,4 +5,5 @@ export type RootStackParams = {
   ShowContact: {
     contact: Contact;
   };
+  CreateContact: undefined;
 };

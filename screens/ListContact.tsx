@@ -69,7 +69,11 @@ const ListContact: React.FC<ListContactProps> = props => {
           <Paragraph>{error}</Paragraph>
         </Surface>
       )}
-      <FAB icon="plus" style={styles.fab} />
+      <FAB
+        icon="plus"
+        style={styles.fab}
+        onPress={() => props.navigation.navigate('CreateContact')}
+      />
     </View>
   );
 };
