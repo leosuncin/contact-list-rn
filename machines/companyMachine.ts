@@ -7,7 +7,13 @@ import {
 } from 'types/statechart';
 import isEmpty from 'validator/lib/isEmpty';
 import isLength from 'validator/lib/isLength';
-import { assign, Machine, MachineConfig, MachineOptions } from 'xstate';
+import {
+  assign,
+  Machine,
+  MachineConfig,
+  MachineOptions,
+  sendParent,
+} from 'xstate';
 
 type CompanyEvent =
   | SetCompanyNameEvent
@@ -46,7 +52,7 @@ const companyConfig: MachineConfig<
             actions: 'setCompanyName',
             cond: 'isCompanyNameEmpty',
           },
-          { target: '.valid', actions: 'setCompanyName' },
+          { target: '.valid', actions: ['setCompanyName', 'sendCompanyName'] },
         ],
       },
     },
@@ -75,7 +81,7 @@ const companyConfig: MachineConfig<
             actions: 'setCatchPhrase',
             cond: 'isCatchPhraseShort',
           },
-          { target: '.valid', actions: 'setCatchPhrase' },
+          { target: '.valid', actions: ['setCatchPhrase', 'sendCatchPhrase'] },
         ],
       },
     },
@@ -104,7 +110,7 @@ const companyConfig: MachineConfig<
             actions: 'setBusiness',
             cond: 'isBusinessShort',
           },
-          { target: '.valid', actions: 'setBusiness' },
+          { target: '.valid', actions: ['setBusiness', 'sendBusiness'] },
         ],
       },
     },
@@ -121,6 +127,9 @@ const companyOptions: Partial<MachineOptions<Company, CompanyEvent>> = {
     setBusiness: assign((_, event: SetBusinessEvent) => ({
       bs: event.business,
     })),
+    sendCompanyName: sendParent((_, event: SetCompanyNameEvent) => event),
+    sendCatchPhrase: sendParent((_, event: SetCatchPhraseEvent) => event),
+    sendBusiness: sendParent((_, event: SetBusinessEvent) => event),
   },
   guards: {
     isCompanyNameEmpty(_, event: SetCompanyNameEvent) {

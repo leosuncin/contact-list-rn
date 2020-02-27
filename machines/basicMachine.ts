@@ -12,7 +12,13 @@ import isEmpty from 'validator/lib/isEmpty';
 import isLength from 'validator/lib/isLength';
 import isURL from 'validator/lib/isURL';
 import matches from 'validator/lib/matches';
-import { assign, Machine, MachineConfig, MachineOptions } from 'xstate';
+import {
+  assign,
+  Machine,
+  MachineConfig,
+  MachineOptions,
+  sendParent,
+} from 'xstate';
 
 type BasicEvent =
   | SetNameEvent
@@ -51,7 +57,7 @@ const basicConfig: MachineConfig<BasicContext, BasicStateSchema, BasicEvent> = {
             actions: 'setName',
             cond: 'isNameEmpty',
           },
-          { target: '.valid', actions: 'setName' },
+          { target: '.valid', actions: ['setName', 'sendName'] },
         ],
       },
     },
@@ -86,7 +92,7 @@ const basicConfig: MachineConfig<BasicContext, BasicStateSchema, BasicEvent> = {
             actions: 'setUsername',
             cond: 'isUsernameIncorrect',
           },
-          { target: '.valid', actions: 'setUsername' },
+          { target: '.valid', actions: ['setUsername', 'sendUsername'] },
         ],
       },
     },
@@ -115,7 +121,7 @@ const basicConfig: MachineConfig<BasicContext, BasicStateSchema, BasicEvent> = {
             actions: 'setEmail',
             cond: 'isEmailIncorrect',
           },
-          { target: '.valid', actions: 'setEmail' },
+          { target: '.valid', actions: ['setEmail', 'sendEmail'] },
         ],
       },
     },
@@ -144,7 +150,7 @@ const basicConfig: MachineConfig<BasicContext, BasicStateSchema, BasicEvent> = {
             actions: 'setPhone',
             cond: 'isPhoneIncorrect',
           },
-          { target: '.valid', actions: 'setPhone' },
+          { target: '.valid', actions: ['setPhone', 'sendPhone'] },
         ],
       },
     },
@@ -173,7 +179,7 @@ const basicConfig: MachineConfig<BasicContext, BasicStateSchema, BasicEvent> = {
             actions: 'setWebsite',
             cond: 'isWebsiteIncorrect',
           },
-          { target: '.valid', actions: 'setWebsite' },
+          { target: '.valid', actions: ['setWebsite', 'sendWebsite'] },
         ],
       },
     },
@@ -192,7 +198,21 @@ const basicOptions: Partial<MachineOptions<BasicContext, BasicEvent>> = {
     })),
     setPhone: assign((_, event: SetPhoneEvent) => ({ phone: event.phone })),
     setWebsite: assign((_, event: SetWebsiteEvent) => ({
-      website: event.website,
+      website: event.website.toLocaleLowerCase(),
+    })),
+    sendName: sendParent((_, event: SetNameEvent) => event),
+    sendUsername: sendParent<BasicContext, SetUsernameEvent>(context => ({
+      type: 'SET_USERNAME',
+      username: context.username,
+    })),
+    sendEmail: sendParent<BasicContext, SetEmailEvent>(context => ({
+      type: 'SET_EMAIL',
+      email: context.email,
+    })),
+    sendPhone: sendParent((_, event: SetPhoneEvent) => event),
+    sendWebsite: sendParent<BasicContext, SetWebsiteEvent>(context => ({
+      type: 'SET_WEBSITE',
+      website: context.website,
     })),
   },
   guards: {

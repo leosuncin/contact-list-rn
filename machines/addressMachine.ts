@@ -9,7 +9,13 @@ import {
   SetZipCodeEvent,
 } from 'types/statechart';
 import isEmpty from 'validator/lib/isEmpty';
-import { assign, Machine, MachineConfig, MachineOptions } from 'xstate';
+import {
+  assign,
+  Machine,
+  MachineConfig,
+  MachineOptions,
+  sendParent,
+} from 'xstate';
 
 type AddressEvent =
   | SetStreetEvent
@@ -67,7 +73,7 @@ const addressConfig: MachineConfig<
             actions: 'setStreet',
             cond: 'isStreetEmpty',
           },
-          { target: '.valid', actions: 'setStreet' },
+          { target: '.valid', actions: ['setStreet', 'sendStreet'] },
         ],
       },
     },
@@ -90,7 +96,7 @@ const addressConfig: MachineConfig<
             actions: 'setSuite',
             cond: 'isSuiteEmpty',
           },
-          { target: '.valid', actions: 'setSuite' },
+          { target: '.valid', actions: ['setSuite', 'sendSuite'] },
         ],
       },
     },
@@ -113,7 +119,7 @@ const addressConfig: MachineConfig<
             actions: 'setCity',
             cond: 'isCityEmpty',
           },
-          { target: '.valid', actions: 'setCity' },
+          { target: '.valid', actions: ['setCity', 'sendCity'] },
         ],
       },
     },
@@ -136,7 +142,7 @@ const addressConfig: MachineConfig<
             actions: 'setZipCode',
             cond: 'isZipCodeEmpty',
           },
-          { target: '.valid', actions: 'setZipCode' },
+          { target: '.valid', actions: ['setZipCode', 'sendZipCode'] },
         ],
       },
     },
@@ -165,7 +171,7 @@ const addressConfig: MachineConfig<
             actions: 'setLatitude',
             cond: 'isLatitudeIncorrect',
           },
-          { target: '.valid', actions: 'setLatitude' },
+          { target: '.valid', actions: ['setLatitude', 'sendLatitude'] },
         ],
       },
     },
@@ -194,7 +200,7 @@ const addressConfig: MachineConfig<
             actions: 'setLongitude',
             cond: 'isLongitudeIncorrect',
           },
-          { target: '.valid', actions: 'setLongitude' },
+          { target: '.valid', actions: ['setLongitude', 'sendLongitude'] },
         ],
       },
     },
@@ -226,6 +232,12 @@ const addressOptions: Partial<MachineOptions<Address, AddressEvent>> = {
         lng: event.longitude,
       },
     })),
+    sendStreet: sendParent((_, event: SetStreetEvent) => event),
+    sendSuite: sendParent((_, event: SetSuiteEvent) => event),
+    sendCity: sendParent((_, event: SetCityEvent) => event),
+    sendZipCode: sendParent((_, event: SetZipCodeEvent) => event),
+    sendLatitude: sendParent((_, event: SetLatitudeEvent) => event),
+    sendLongitude: sendParent((_, event: SetLongitudeEvent) => event),
   },
   guards: {
     isStreetEmpty(_, event: SetStreetEvent) {
