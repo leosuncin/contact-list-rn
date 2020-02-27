@@ -1,4 +1,12 @@
-import { Contact } from 'types';
+import {
+  BasicContext,
+  BasicStateSchema,
+  SetEmailEvent,
+  SetNameEvent,
+  SetPhoneEvent,
+  SetUsernameEvent,
+  SetWebsiteEvent,
+} from 'types/statechart';
 import isEmail from 'validator/lib/isEmail';
 import isEmpty from 'validator/lib/isEmpty';
 import isLength from 'validator/lib/isLength';
@@ -6,47 +14,6 @@ import isURL from 'validator/lib/isURL';
 import matches from 'validator/lib/matches';
 import { assign, Machine, MachineConfig, MachineOptions } from 'xstate';
 
-type BasicContext = Pick<
-  Contact,
-  'name' | 'username' | 'email' | 'phone' | 'website'
->;
-type BasicStateSchema = {
-  states: {
-    [input in keyof BasicContext]: InputStateSchema;
-  };
-};
-type InputStateSchema = {
-  states: {
-    valid: {};
-    invalid: {
-      states: {
-        empty: {};
-        tooShort?: {};
-        incorrect?: {};
-      };
-    };
-  };
-};
-type SetNameEvent = {
-  type: 'SET_NAME';
-  name: string;
-};
-type SetUsernameEvent = {
-  type: 'SET_USERNAME';
-  username: string;
-};
-type SetEmailEvent = {
-  type: 'SET_EMAIL';
-  email: string;
-};
-type SetPhoneEvent = {
-  type: 'SET_PHONE';
-  phone: string;
-};
-type SetWebsiteEvent = {
-  type: 'SET_WEBSITE';
-  website: string;
-};
 type BasicEvent =
   | SetNameEvent
   | SetUsernameEvent
