@@ -1,9 +1,21 @@
-import { useMachine } from '@xstate/react';
+import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
+import { CompositeNavigationProp, RouteProp } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { useService } from '@xstate/react';
 import TextInput from 'components/TextInput';
-import companyMachine from 'machines/companyMachine';
 import React from 'react';
 import { NativeModules, Platform, StyleSheet, View } from 'react-native';
 import { Button, Divider, Headline } from 'react-native-paper';
+import { CreateContactParams } from 'types/CreateContactParams';
+import { RootStackParams } from 'types/RootStackParams';
+
+type CompanyTabProps = {
+  navigation: CompositeNavigationProp<
+    StackNavigationProp<RootStackParams, 'CreateContact'>,
+    BottomTabNavigationProp<CreateContactParams, 'Company'>
+  >;
+  route: RouteProp<CreateContactParams, 'Company'>;
+};
 
 const errorMessages = {
   company: {
@@ -18,10 +30,10 @@ const errorMessages = {
     tooShort: 'Catch phrase should be at least 3 length',
   },
 };
-const CompanyTab: React.FC = () => {
-  const [currentState, sendEvent] = useMachine(companyMachine, {
-    devTools: __DEV__,
-  });
+const CompanyTab: React.FC<CompanyTabProps> = props => {
+  const [currentState, sendEvent] = useService(
+    props.route.params.companyMachineRef,
+  );
 
   function hasError(name: string): boolean {
     return currentState.matches(`${name}.invalid`);
@@ -33,6 +45,11 @@ const CompanyTab: React.FC = () => {
     if (currentState.toStrings().includes(`${name}.invalid.tooShort`)) {
       return errorMessages[name].tooShort;
     }
+  }
+  function isInvalid(): boolean {
+    return currentState
+      .toStrings()
+      .some(state => state.search(/invalid|pristine/) !== -1);
   }
 
   return (
@@ -65,14 +82,25 @@ const CompanyTab: React.FC = () => {
         helperText={getErrorMessage('business')}
         onChangeText={business => sendEvent({ type: 'SET_BUSINESS', business })}
       />
-      <Button
-        mode="outlined"
-        onPress={() =>
-          console.log(currentState.context, currentState.toStrings())
-        }
-      >
-        Next
-      </Button>
+      <View style={styles.steps}>
+        <Button
+          mode="outlined"
+          contentStyle={styles.step}
+          onPress={() => props.navigation.goBack()}
+        >
+          Back
+        </Button>
+        <Button
+          mode="contained"
+          contentStyle={styles.step}
+          disabled={isInvalid()}
+          onPress={() => {
+            props.navigation.navigate('ListContact');
+          }}
+        >
+          Add Contact
+        </Button>
+      </View>
     </View>
   );
 };
@@ -86,5 +114,13 @@ const styles = StyleSheet.create({
   },
   divider: {
     marginVertical: 10,
+  },
+  steps: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingTop: 15,
+  },
+  step: {
+    minWidth: '40%',
   },
 });

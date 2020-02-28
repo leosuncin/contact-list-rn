@@ -1,6 +1,7 @@
-import { useMachine } from '@xstate/react';
+import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
+import { RouteProp } from '@react-navigation/native';
+import { useService } from '@xstate/react';
 import TextInput from 'components/TextInput';
-import basicMachine from 'machines/basicMachine';
 import React from 'react';
 import {
   NativeModules,
@@ -8,8 +9,15 @@ import {
   SafeAreaView,
   ScrollView,
   StyleSheet,
+  View,
 } from 'react-native';
 import { Button, Divider, Headline } from 'react-native-paper';
+import { CreateContactParams } from 'types/CreateContactParams';
+
+type BasicTabProps = {
+  navigation: BottomTabNavigationProp<CreateContactParams, 'Basic'>;
+  route: RouteProp<CreateContactParams, 'Basic'>;
+};
 
 const errorMessages = {
   name: {
@@ -33,10 +41,10 @@ const errorMessages = {
     incorrect: 'Website is invalid',
   },
 };
-const BasicTab: React.FC = () => {
-  const [currentState, sendEvent] = useMachine(basicMachine, {
-    devTools: __DEV__,
-  });
+const BasicTab: React.FC<BasicTabProps> = props => {
+  const [currentState, sendEvent] = useService(
+    props.route.params.basicMachineRef,
+  );
 
   function hasError(name: string): boolean {
     return currentState.matches(`${name}.invalid`);
@@ -51,6 +59,11 @@ const BasicTab: React.FC = () => {
     if (currentState.toStrings().includes(`${name}.invalid.incorrect`)) {
       return errorMessages[name].incorrect;
     }
+  }
+  function isInvalid(): boolean {
+    return currentState
+      .toStrings()
+      .some(state => state.search(/invalid|pristine/) !== -1);
   }
 
   return (
@@ -103,12 +116,16 @@ const BasicTab: React.FC = () => {
           helperText={getErrorMessage('website')}
           onChangeText={website => sendEvent({ type: 'SET_WEBSITE', website })}
         />
-        <Button
-          mode="outlined"
-          onPress={() => console.log(currentState.context)}
-        >
-          Next
-        </Button>
+        <View style={styles.steps}>
+          <Button
+            mode="outlined"
+            contentStyle={styles.step}
+            disabled={isInvalid()}
+            onPress={() => props.navigation.navigate('Address')}
+          >
+            Next
+          </Button>
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -123,5 +140,13 @@ const styles = StyleSheet.create({
   },
   divider: {
     marginVertical: 10,
+  },
+  steps: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    paddingTop: 15,
+  },
+  step: {
+    minWidth: '40%',
   },
 });

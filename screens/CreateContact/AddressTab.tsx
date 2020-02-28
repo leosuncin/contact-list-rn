@@ -1,6 +1,7 @@
-import { useMachine } from '@xstate/react';
+import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
+import { RouteProp } from '@react-navigation/native';
+import { useService } from '@xstate/react';
 import TextInput from 'components/TextInput';
-import addressMachine from 'machines/addressMachine';
 import React from 'react';
 import {
   NativeModules,
@@ -8,8 +9,15 @@ import {
   SafeAreaView,
   ScrollView,
   StyleSheet,
+  View,
 } from 'react-native';
 import { Button, Divider, Headline } from 'react-native-paper';
+import { CreateContactParams } from 'types/CreateContactParams';
+
+type AddressTabProps = {
+  navigation: BottomTabNavigationProp<CreateContactParams, 'Address'>;
+  route: RouteProp<CreateContactParams, 'Address'>;
+};
 
 const errorMessages = {
   street: {
@@ -33,10 +41,10 @@ const errorMessages = {
     incorrect: 'Longitude is invalid',
   },
 };
-const AddressTab: React.FC = () => {
-  const [currentState, sendEvent] = useMachine(addressMachine, {
-    devTools: __DEV__,
-  });
+const AddressTab: React.FC<AddressTabProps> = props => {
+  const [currentState, sendEvent] = useService(
+    props.route.params.addressMachineRef,
+  );
 
   function hasError(name: string): boolean {
     return currentState.matches(`${name}.invalid`);
@@ -51,6 +59,11 @@ const AddressTab: React.FC = () => {
     if (currentState.toStrings().includes(`${name}.invalid.incorrect`)) {
       return errorMessages[name].incorrect;
     }
+  }
+  function isInvalid(): boolean {
+    return currentState
+      .toStrings()
+      .some(state => state.search(/invalid|pristine/) !== -1);
   }
 
   return (
@@ -75,6 +88,7 @@ const AddressTab: React.FC = () => {
         <TextInput
           mode="outlined"
           label="City"
+          autoCapitalize="words"
           error={hasError('city')}
           helperText={getErrorMessage('city')}
           onChangeText={city => sendEvent({ type: 'SET_CITY', city })}
@@ -106,14 +120,23 @@ const AddressTab: React.FC = () => {
             sendEvent({ type: 'SET_LONGITUDE', longitude })
           }
         />
-        <Button
-          mode="outlined"
-          onPress={() =>
-            console.log(currentState.context, currentState.toStrings())
-          }
-        >
-          Next
-        </Button>
+        <View style={styles.steps}>
+          <Button
+            mode="outlined"
+            contentStyle={styles.step}
+            onPress={() => props.navigation.goBack()}
+          >
+            Back
+          </Button>
+          <Button
+            mode="outlined"
+            contentStyle={styles.step}
+            disabled={isInvalid()}
+            onPress={() => props.navigation.navigate('Company')}
+          >
+            Next
+          </Button>
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -128,5 +151,13 @@ const styles = StyleSheet.create({
   },
   divider: {
     marginVertical: 10,
+  },
+  steps: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingTop: 15,
+  },
+  step: {
+    minWidth: '40%',
   },
 });
