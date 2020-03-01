@@ -1,6 +1,7 @@
 import { Company } from 'types';
 import {
   CompanyStateSchema,
+  FinishEvent,
   SetBusinessEvent,
   SetCatchPhraseEvent,
   SetCompanyNameEvent,
@@ -18,7 +19,8 @@ import {
 type CompanyEvent =
   | SetCompanyNameEvent
   | SetCatchPhraseEvent
-  | SetBusinessEvent;
+  | SetBusinessEvent
+  | FinishEvent;
 
 const companyConfig: MachineConfig<
   Company,
@@ -112,6 +114,18 @@ const companyConfig: MachineConfig<
           },
           { target: '.valid', actions: ['setBusiness', 'sendBusiness'] },
         ],
+      },
+    },
+  },
+  on: {
+    FINISH: {
+      actions: sendParent('FINISH'),
+      cond(context) {
+        return (
+          !isEmpty(context.name) &&
+          isLength(context.catchPhrase, { min: 3 }) &&
+          isLength(context.bs, { min: 3 })
+        );
       },
     },
   },

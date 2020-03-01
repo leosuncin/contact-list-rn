@@ -1,6 +1,7 @@
 import { Interpreter } from 'xstate';
 import {
   CompanyStateSchema,
+  FinishEvent,
   SetBusinessEvent,
   SetCatchPhraseEvent,
   SetCompanyNameEvent,
@@ -10,5 +11,5 @@ import { Company } from '..';
 export type CompanyInterpreter = Interpreter<
   Company,
   CompanyStateSchema,
-  SetCompanyNameEvent | SetCatchPhraseEvent | SetBusinessEvent
+  SetCompanyNameEvent | SetCatchPhraseEvent | SetBusinessEvent | FinishEvent
 >;

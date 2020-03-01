@@ -94,9 +94,7 @@ const CompanyTab: React.FC<CompanyTabProps> = props => {
           mode="contained"
           contentStyle={styles.step}
           disabled={isInvalid()}
-          onPress={() => {
-            props.navigation.navigate('ListContact');
-          }}
+          onPress={() => sendEvent('FINISH')}
         >
           Add Contact
         </Button>

@@ -1,18 +1,37 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { StackNavigationProp } from '@react-navigation/stack';
 import { useMachine } from '@xstate/react';
 import createContactMachine from 'machines/createContactMachine';
-import React from 'react';
+import React, { useCallback } from 'react';
+import { useDispatch } from 'react-redux';
+import { addContact } from 'state/slices/contact';
 import { CreateContactParams } from 'types/CreateContactParams';
+import { RootStackParams } from 'types/RootStackParams';
 import AddressTab from './AddressTab';
 import BasicTab from './BasicTab';
 import CompanyTab from './CompanyTab';
 
+type CreateContactProps = {
+  navigation: StackNavigationProp<RootStackParams, 'CreateContact'>;
+};
+
 const Tab = createBottomTabNavigator<CreateContactParams>();
-const CreateContact: React.FC = () => {
-  const [state] = useMachine(createContactMachine, {
+const CreateContact: React.FC<CreateContactProps> = ({ navigation }) => {
+  const dispatch = useDispatch();
+  const [state, , service] = useMachine(createContactMachine, {
     devTools: __DEV__,
   });
+  const handleDone = useCallback(
+    event => {
+      dispatch(addContact(event.data));
+      navigation.navigate('ListContact');
+      service.off(handleDone);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
+  );
+  service.onDone(handleDone);
 
   return (
     <Tab.Navigator initialRouteName="Basic">

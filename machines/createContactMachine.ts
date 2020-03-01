@@ -1,6 +1,7 @@
 import {
   CreateContactContext,
   CreateContactStateSchema,
+  FinishEvent,
   SetBusinessEvent,
   SetCatchPhraseEvent,
   SetCityEvent,
@@ -35,7 +36,8 @@ type CreateContactEvent =
   | SetLongitudeEvent
   | SetCompanyNameEvent
   | SetCatchPhraseEvent
-  | SetBusinessEvent;
+  | SetBusinessEvent
+  | FinishEvent;
 
 const createContactConfig: MachineConfig<
   CreateContactContext,
@@ -112,7 +114,13 @@ const createContactConfig: MachineConfig<
         },
       },
     },
-    finish: {},
+    finish: {
+      type: 'final',
+      data: context => context.contact,
+    },
+  },
+  on: {
+    FINISH: 'finish',
   },
 };
 const createContactOptions: Partial<MachineOptions<
