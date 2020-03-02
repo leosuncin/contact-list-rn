@@ -20,30 +20,44 @@ type ListContactProps = {
   navigation: StackNavigationProp<RootStackParams, 'ListContact'>;
 };
 
+function Fetch() {
+  const dispatch = useDispatch();
+
+  return (
+    <Surface style={styles.surface}>
+      <Paragraph>There isn't any contacts</Paragraph>
+      <Button onPress={() => dispatch(fetchContacts())}>
+        Fetch some contacts
+      </Button>
+    </Surface>
+  );
+}
+function Loading() {
+  return (
+    <Surface style={styles.surface}>
+      <Paragraph>Loading contacts</Paragraph>
+      <ActivityIndicator animating size="large" />
+    </Surface>
+  );
+}
+function Fail({ error }) {
+  return (
+    <Surface style={styles.surface}>
+      <Paragraph>{error}</Paragraph>
+    </Surface>
+  );
+}
+
 const ListContact: React.FC<ListContactProps> = props => {
   const contacts = useSelector(selectContacts);
   const { state, error } = useSelector(
     (rootState: RootState) => rootState.fetch,
   );
-  const dispatch = useDispatch();
+  console.table(contacts);
 
   return (
-    <View style={[styles.screen, state !== 'loaded' && styles.center]}>
-      {state === 'ready' && contacts.length < 1 && (
-        <Surface style={styles.surface}>
-          <Paragraph>There isn't any contacts</Paragraph>
-          <Button onPress={() => dispatch(fetchContacts())}>
-            Load some contacts
-          </Button>
-        </Surface>
-      )}
-      {state === 'loading' && (
-        <Surface style={styles.surface}>
-          <Paragraph>Loading contacts</Paragraph>
-          <ActivityIndicator animating size="large" />
-        </Surface>
-      )}
-      {state === 'loaded' && (
+    <View style={[styles.screen, contacts.length < 1 && styles.center]}>
+      {contacts.length > 0 ? (
         <DataTable>
           <DataTable.Header>
             <DataTable.Title>ID</DataTable.Title>
@@ -63,11 +77,10 @@ const ListContact: React.FC<ListContactProps> = props => {
             </DataTable.Row>
           ))}
         </DataTable>
-      )}
-      {state === 'fail' && (
-        <Surface style={styles.surface}>
-          <Paragraph>{error}</Paragraph>
-        </Surface>
+      ) : (
+        (state === 'ready' && <Fetch />) ||
+        (state === 'loading' && <Loading />) ||
+        (state === 'fail' && <Fail error={error} />)
       )}
       <FAB
         icon="plus"

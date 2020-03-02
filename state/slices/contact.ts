@@ -26,7 +26,7 @@ const contactSlice = createSlice<Array<Contact>, ContactReducers>({
       state.push(...action.payload);
     },
     addContact(state, action) {
-      state.push({ ...action.payload, id: state.length + 1 });
+      state.push({ ...action.payload, id: Date.now() });
     },
     updateContact(state, action) {
       const index = state.findIndex(
